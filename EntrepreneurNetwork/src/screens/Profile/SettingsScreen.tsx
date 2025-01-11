@@ -2,7 +2,26 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigator/RootStackParamList';
+
+
 const SettingsScreen = () => {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    
+    const { LogoutUser } = useAuth();
+
+    const handleLogout = async () => {
+        try{
+            await LogoutUser();
+            navigation.navigate('Login')
+        }
+        catch(error){
+            console.error("Error during Logout", error);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Settings</Text>
@@ -42,7 +61,7 @@ const SettingsScreen = () => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.logoutButton}>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                 <Ionicons name="log-out" size={24} color="red" style={styles.icon} />
                 <Text style={styles.logoutText}>Log out</Text>
             </TouchableOpacity>

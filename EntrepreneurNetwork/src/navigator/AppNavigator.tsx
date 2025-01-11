@@ -15,12 +15,15 @@ import ForgotPassword from '../screens/Auth/ForgotPassword';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import SettingsScreen from '../screens/Profile/SettingsScreen';
 import Demo from '../screens/extraPages/demo';
+import Toast from 'react-native-toast-message';
+import { AuthProvider } from '../context/AuthContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => (
   <NavigationContainer >
     <SafeAreaView style={{flex:1}}>
+    <AuthProvider>
     <Stack.Navigator screenOptions={{
          headerShown: false,
        }}
@@ -38,6 +41,8 @@ const AppNavigator = () => (
       <Stack.Screen name="Demo" component={Demo}/>
 
     </Stack.Navigator>
+    <Toast />
+    </AuthProvider>
     </SafeAreaView>
   </NavigationContainer>
 );

@@ -9,7 +9,12 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigator/RootStackParamList';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../../context/AuthContext';
+
 const HomeScreen: React.FC = () => {
+  const {token} = useAuth();
+  console.log("Access Token:",token);
+
   const stories = [
     { id: 1, profileImage: require('../../assets/images/icon.png'), username: 'john_doe' },
     { id: 2, profileImage: require('../../assets/images/icon.png'), username: 'jane_smith' },

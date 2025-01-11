@@ -22,7 +22,7 @@ const ForgotPasswordScreen = () => {
 
   const handleNext = () => {
     if (step === 1 && !emailOrPhone.trim()) {
-      alert('Please enter your email or phone number');
+      alert('Please enter your email');
     } else {
       setStep(2);
     }
@@ -79,7 +79,7 @@ const ForgotPasswordScreen = () => {
                   style={styles.icon}
                 />
                 <TextInput
-                  placeholder="Email or Phone Number"
+                  placeholder="Enter your Email"
                   style={styles.input}
                   value={emailOrPhone}
                   onChangeText={setEmailOrPhone}

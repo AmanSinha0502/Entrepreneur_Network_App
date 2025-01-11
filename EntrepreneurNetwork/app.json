@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "EntrepreneurNetwork",
+    "slug": "EntrepreneurNetwork",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.sinhaaman.EntrepreneurNetwork"
+    },
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "31082588-a8df-49ab-8268-c62975ae4f3c"
+      }
+    }
+  }
+}

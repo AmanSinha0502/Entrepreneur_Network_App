@@ -6,12 +6,14 @@ import PostCard from "../../components/Cards/PostCard";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigator/RootStackParamList";
 import { useAuth } from "../../context/AuthContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 const rootOrigin = process.env.EXPO_PUBLIC_LOCAL_DEV_IP;
 
 interface Post {
   _id: string;
   text: string;
+  username: string;
   image: {
     contentType: string;
     data: { data: number[] };
@@ -27,11 +29,11 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const stories = [
-    { id: 1, profileImage: require("../../assets/images/icon.png"), username: "john_doe" },
-    { id: 2, profileImage: require("../../assets/images/icon.png"), username: "jane_smith" },
-    { id: 3, profileImage: require("../../assets/images/icon.png"), username: "alex_brown" },
-  ];
+  // const stories = [
+  //   { id: 1, profileImage: require("../../assets/images/icon.png"), username: "john_doe" },
+  //   { id: 2, profileImage: require("../../assets/images/icon.png"), username: "jane_smith" },
+  //   { id: 3, profileImage: require("../../assets/images/icon.png"), username: "alex_brown" },
+  // ];
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -94,6 +96,12 @@ const HomeScreen: React.FC = () => {
     fetchPosts();
   }, [token]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPosts(); // Fetch data whenever the screen comes into focus
+    }, [])
+  );
+
   return (
     <ScrollView style={styles.container}>
       {/* Top Navigation */}
@@ -106,13 +114,13 @@ const HomeScreen: React.FC = () => {
       </View>
 
       {/* Stories Section */}
-      <View style={styles.storiesContainer}>
+      {/* <View style={styles.storiesContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {stories.map((story) => (
             <StoryCard key={story.id} profileImage={story.profileImage} username={story.username} />
           ))}
         </ScrollView>
-      </View>
+      </View> */}
 
       {/* Content Section */}
       {loading ? (
@@ -136,7 +144,7 @@ const HomeScreen: React.FC = () => {
           <PostCard
             key={post._id}
             profileImage={require("../../assets/images/image2.png")}
-            username={username}
+            username={post.username}
             postImage={post.imageBase64}
             caption={post.text}
           />

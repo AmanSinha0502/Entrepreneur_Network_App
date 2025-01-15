@@ -15,7 +15,7 @@ const createPost = (req, res) => {
 
     console.log('Uploaded Files:', files);
 
-    let { text, userId } = fields;
+    let { text, userId, username } = fields;
     const { image } = files;
 
     // Convert text and userId to strings if they are arrays
@@ -24,6 +24,10 @@ const createPost = (req, res) => {
     }
     if (Array.isArray(userId)) {
       userId = userId[0]; // Get the first element if it's an array
+    }
+
+    if (Array.isArray(username)) {
+      username = username[0]; // Get the first element if it's an array
     }
 
     // Check if image is uploaded
@@ -54,6 +58,7 @@ const createPost = (req, res) => {
           contentType: contentType,
           path: newImagePath,
         },
+        username,
       });
 
       await post.save();

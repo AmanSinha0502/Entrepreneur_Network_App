@@ -23,6 +23,7 @@ import { encode as btoa } from 'base-64';
 interface Post {
   _id: string;
   text: string;
+  username: string;
   image: {
     contentType: string;
     data: { data: number[] };
@@ -33,7 +34,7 @@ interface Post {
 const rootOrigin = process.env.EXPO_PUBLIC_LOCAL_DEV_IP;
 
 const ProfileScreen: React.FC = () => {
-  
+
   const { token, user, username } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [postText, setPostText] = useState<string>('');
@@ -108,6 +109,7 @@ const ProfileScreen: React.FC = () => {
       type: 'image/jpeg',
     } as any);
     formData.append('userId', user);
+    formData.append('username', username)
 
     try {
       console.log('Sending post request to backend...');
@@ -174,14 +176,21 @@ const ProfileScreen: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch posts');
+  
+      if (response.status === 404) {
+        // Handle the case where there are no posts (404 error)
+        setError('No posts done yet');
+        setPosts([]); // Clear any previous posts
+        return; // Exit the function early
       }
-
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch your posts');
+      }
+  
       const data = await response.json();
-      console.log('Posts fetched: ', data);
-
+      console.log('Server Response: ', data);
+  
       const formattedPosts = data.posts.map((post: Post) => {
         const imageBase64 = `data:${post.image.contentType};base64,${btoa(
           String.fromCharCode(...new Uint8Array(post.image.data.data))
@@ -191,19 +200,21 @@ const ProfileScreen: React.FC = () => {
           imageBase64,
         };
       });
-
+  
       setPosts(formattedPosts);
+      setError(''); // Clear any previous error message
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError('Error fetching posts');
+      setError(`Error fetching posts: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchPosts();
   }, [user, token]);
+  
 
   if (loading) {
     console.log('Loading posts...');
@@ -228,17 +239,51 @@ const ProfileScreen: React.FC = () => {
         </View>
         <View style={styles.box_2}>
           <View style={styles.userContainer}>
-            <Image source={require('../../assets/images/icon.png')} style={styles.profileImage} />
-            <Text style={styles.username}>{username}</Text>
-            <Text>{userData._id}</Text>
-            <Text>{userData.username}</Text>
-            <Text>{userData.email}</Text>
-            <Text>{userData.phone}</Text>
-            <Text>{userData.occupation}</Text>
-            <Text>{userData.supply}</Text>
-            <Text>{userData.description}</Text>
+            <View style={styles.profileSection}>
+              <Image source={require('../../assets/images/icon.png')} style={styles.profileImage} />
+              <Text style={styles.username}>{username}</Text>
+            </View>
+
+            <View style={styles.infoContainer}>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>User ID:</Text>
+                <Text>{userData._id}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>User Name:</Text>
+                <Text>{userData.username}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>Email Address:</Text>
+                <Text>{userData.email}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>Phone Number:</Text>
+                <Text>{userData.phone}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>Occupation:</Text>
+                <Text>{userData.occupation}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>My Supply:</Text>
+                <Text>{userData.supply}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoText}>About Me:</Text>
+                <Text>{userData.description}</Text>
+              </View>
+            </View>
           </View>
           <View style={styles.posts}>
+            <Text style={{fontSize:18,fontWeight:'bold'}}>Posts</Text>
+            <View style={styles.userInput}>
             <TextInput
               style={styles.textInput}
               placeholder="What's on your mind?"
@@ -246,12 +291,15 @@ const ProfileScreen: React.FC = () => {
               value={postText}
               onChangeText={setPostText}
             />
-            <TouchableOpacity onPress={handleUploadIconPress}>
+            <TouchableOpacity style={styles.uploadButton} onPress={handleUploadIconPress}>
               <Entypo name="upload" size={24} color="black" />
             </TouchableOpacity>
+            </View>
             {selectedImage && (
               <Image source={{ uri: selectedImage }} style={styles.previewImage} />
             )}
+           
+
             <Button title="Post" backgroundColor="#3333cc" onPress={postToBackend} />
             {posting && <ActivityIndicator size="large" color="#3333cc" />}
           </View>
@@ -267,7 +315,7 @@ const ProfileScreen: React.FC = () => {
               <PostCard
                 key={post._id}
                 profileImage={require('../../assets/images/image2.png')}
-                username={username}
+                username={post.username}
                 postImage={post.imageBase64}
                 caption={post.text}
               />
@@ -304,30 +352,40 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  userContainer: {
-    alignItems: 'center',
-    padding: 15,
-  },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
   },
-  username: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   posts: {
     padding: 15,
-    backgroundColor: '#f1f1f1',
     borderRadius: 10,
+    backgroundColor:'#88c0f7',
+  },
+ 
+  userInput:{
+    borderRadius:10,
+    marginVertical:10,
+    backgroundColor:'#bdddfc',
+    flexDirection: 'row', // Aligns items horizontally
+  alignItems: 'center', // Vertically aligns items in the center
+  justifyContent: 'space-between', // Optional, if you want some space between the input and button
+  width: '100%', // Ensures the container takes full width
+
   },
   textInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
+    flex: 1, // Makes the TextInput take up available space
+    height: 40,
     borderRadius: 5,
-    marginBottom: 10,
+    marginRight: 10, // Optional, adds space between the input and button
+    paddingLeft: 10,
+  },
+  
+  uploadButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center', // Centers the button text
   },
   previewImage: {
     width: 100,
@@ -338,6 +396,41 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     flex: 1,
   },
+  userContainer: {
+    paddingTop: 15,
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  
+  profileSection: {
+    alignItems: 'center',
+    flexDirection: 'column',
+    marginBottom: 15,
+  },
+  username: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  
+  infoContainer: {
+    alignSelf: 'stretch',
+    paddingHorizontal: 10,
+    flex: 1,
+  },
+  
+  infoItem: {
+    marginBottom: 10,
+  },
+  
+  infoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  
   box_3: {
     flex: 1,
     padding: 15,

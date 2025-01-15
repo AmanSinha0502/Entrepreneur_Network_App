@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingBottom: 10,
+    backgroundColor:'#f0eded'
   },
   profileImage: {
     width: 40,
@@ -74,7 +75,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 20,
     fontSize: 16,
-    backgroundColor:'#6a89a7'
+    backgroundColor:'#88c0f7',
+    borderRadius:10,
   },
 });
 

@@ -5,6 +5,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigator/RootStackParamList';
+import Button from '../../components/Buttons/Button';
 
 
 const SettingsScreen = () => {
@@ -66,11 +67,8 @@ const SettingsScreen = () => {
                         <AntDesign name="right" size={24} color="white" />
                     </View>
                 </TouchableOpacity> */}
+      <Button title="LogOut" backgroundColor="#7793c2" onPress={handleLogout} />
 
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out" size={24} color="red" style={styles.icon} />
-                    <Text style={styles.logoutText}>Log out</Text>
-                </TouchableOpacity>
             </View>
         </View>
     );

@@ -1,87 +1,108 @@
+import React, { useEffect, useState } from "react";
+import { ScrollView, View, StyleSheet, Text, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import StoryCard from "../../components/Cards/StoryCard";
+import PostCard from "../../components/Cards/PostCard";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../../navigator/RootStackParamList";
+import { useAuth } from "../../context/AuthContext";
 
-import React from 'react';
-import { ScrollView, View, StyleSheet, Text, Image } from 'react-native';
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import StoryCard from '../../components/Cards/StoryCard'
-import PostCard from '../../components/Cards/PostCard'
-import { TouchableOpacity } from 'react-native-gesture-handler';
-// import BottomNavigation from '../components/BottomNavigation';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigator/RootStackParamList';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '../../context/AuthContext';
+const rootOrigin = process.env.EXPO_PUBLIC_LOCAL_DEV_IP;
+
+interface Post {
+  _id: string;
+  text: string;
+  image: {
+    contentType: string;
+    data: { data: number[] };
+  };
+  imageBase64?: string;
+}
 
 const HomeScreen: React.FC = () => {
-  const {token} = useAuth();
-  console.log("Access Token:",token);
+  const { token, username } = useAuth();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const stories = [
-    { id: 1, profileImage: require('../../assets/images/icon.png'), username: 'john_doe' },
-    { id: 2, profileImage: require('../../assets/images/icon.png'), username: 'jane_smith' },
-    { id: 3, profileImage: require('../../assets/images/icon.png'), username: 'alex_brown' },
-    { id: 4, profileImage: require('../../assets/images/icon.png'), username: 'john_doe' },
-    { id: 5, profileImage: require('../../assets/images/icon.png'), username: 'jane_smith' },
-    { id: 6, profileImage: require('../../assets/images/icon.png'), username: 'alex_brown' },
-
-    // Add more stories here
+    { id: 1, profileImage: require("../../assets/images/icon.png"), username: "john_doe" },
+    { id: 2, profileImage: require("../../assets/images/icon.png"), username: "jane_smith" },
+    { id: 3, profileImage: require("../../assets/images/icon.png"), username: "alex_brown" },
   ];
 
-  const posts = [
-    {
-      id: 1,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'john_doe',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'This is a beautiful day! the idea of creating this business is based on the requirements of the people and their needs ',
-    },
-    {
-      id: 2,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'jane_smith',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'Exploring the outdoors!',
-    },
-    {
-      id: 3,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'jane_smith',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'Exploring the outdoors!',
-    },
-    {
-      id: 4,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'jane_smith',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'Exploring the outdoors!',
-    },
-    {
-      id: 5,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'jane_smith',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'Exploring the outdoors!',
-    },
-    {
-      id: 6,
-      profileImage: require('../../assets/images/icon.png'),
-      username: 'jane_smith',
-      postImage: require('../../assets/images/adaptive-icon.png'),
-      caption: 'Exploring the outdoors!',
-    },
-  ];
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log("Fetching posts...");
+      const response = await fetch(`${rootOrigin}/api/post/getposts/user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Response Status:", response.status);
+      const responseText = await response.text();
+      console.log("Response Text:", responseText);
+
+      if (response.status === 401) {
+        console.log("Unauthorized. Exiting fetchPosts.");
+        return; // Exit early for 401 Unauthorized
+      }
+
+      if (response.status === 404) {
+        console.log("No posts found.");
+        setPosts([]); // Set an empty list to indicate no posts
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch posts. Server responded with status: ${response.status}`
+        );
+      }
+
+      const data = JSON.parse(responseText);
+
+      if (!data.posts || !Array.isArray(data.posts)) {
+        throw new Error("Invalid data structure received from the server.");
+      }
+
+      const formattedPosts = data.posts.map((post: Post) => {
+        const imageBase64 = `data:${post.image.contentType};base64,${btoa(
+          String.fromCharCode(...new Uint8Array(post.image.data.data))
+        )}`;
+        return { ...post, imageBase64 };
+      });
+
+      setPosts(formattedPosts);
+      console.log("Posts successfully fetched and formatted.");
+    } catch (err: any) {
+      console.error("Error fetching posts:", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [token]);
+
   return (
-    <ScrollView style={styles.Container}>
-
+    <ScrollView style={styles.container}>
       {/* Top Navigation */}
       <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.navigate('Profile')}><MaterialIcons name="account-circle" size={24} color="black" /></TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <MaterialIcons name="account-circle" size={24} color="black" />
+        </TouchableOpacity>
         <Text style={styles.logo}>Entrepreneurs Club</Text>
-        <View style={styles.iconContainer}>
-          {/* <FontAwesome name="heart-o" size={24} color="black" style={styles.icon} /> */}
-          <TouchableOpacity onPress={() => navigation.navigate('Message')}><MaterialIcons name="message" size={24} color="black" style={styles.icon} /></TouchableOpacity>
-        </View>
+        <View style={styles.iconContainer}></View>
       </View>
 
       {/* Stories Section */}
@@ -93,52 +114,99 @@ const HomeScreen: React.FC = () => {
         </ScrollView>
       </View>
 
-      {/* Posts Section */}
-      {posts.map((post) => (
-        <PostCard
-          key={post.id}
-          profileImage={post.profileImage}
-          username={post.username}
-          postImage={post.postImage}
-          caption={post.caption}
-        />
-      ))}
+      {/* Content Section */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading posts...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+          <TouchableOpacity onPress={fetchPosts} style={styles.retryButton}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : posts.length === 0 ? (
+        <View style={styles.noPostsContainer}>
+          <Text style={styles.noPostsText}>No posts available.</Text>
+        </View>
+      ) : (
+        posts.map((post) => (
+          <PostCard
+            key={post._id}
+            profileImage={require("../../assets/images/image2.png")}
+            username={username}
+            postImage={post.imageBase64}
+            caption={post.text}
+          />
+        ))
+      )}
     </ScrollView>
-
   );
 };
 
 const styles = StyleSheet.create({
-  Container: {
-    backgroundColor: '#bdddfc',
-
+  container: {
+    backgroundColor: "#bdddfc",
+    flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#666',
-    backgroundColor: '#6a89a7'
+    borderBottomColor: "#666",
+    backgroundColor: "#6a89a7",
   },
   logo: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    color: "#fff",
   },
   iconContainer: {
-    flexDirection: 'row',
-  },
-  icon: {
-    marginLeft: 15,
+    flexDirection: "row",
   },
   storiesContainer: {
     paddingVertical: 10,
     paddingHorizontal: 5,
   },
-  postsContainer: {
-    // backgroundColor: 'black'
-  }
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  retryButton: {
+    padding: 10,
+    backgroundColor: "#6a89a7",
+    borderRadius: 5,
+  },
+  retryText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  noPostsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  noPostsText: {
+    fontSize: 18,
+    color: "#555",
+  },
 });
 
 export default HomeScreen;

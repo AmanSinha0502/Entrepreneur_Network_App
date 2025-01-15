@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import AppNavigator from './src/navigator/AppNavigator';
 import SplashScreenComponent from './src/screens/extraPages/SplashScreen';
+import { AuthProvider } from './src/context/AuthContext';
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,6 +18,8 @@ export default function App() {
   }
 
   return(
+    <AuthProvider>
     <AppNavigator />
+    </AuthProvider>
   )
 }

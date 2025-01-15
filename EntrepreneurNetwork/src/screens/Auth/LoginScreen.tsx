@@ -72,7 +72,7 @@ const LoginScreen = () => {
           text2: 'Welcome back!',
         });
         console.log('Login successful');
-        await storeTokenAndUser(jsonResponse.token, jsonResponse.userId); // Update this line
+        await storeTokenAndUser(jsonResponse.token, jsonResponse.userId, jsonResponse.username ); // Update this line
         setTimeout(() => {
           navigation.navigate('Home');
         }, 2000);  // 2000ms = 2 seconds delay
@@ -105,6 +105,7 @@ const LoginScreen = () => {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
         />
       </View>
 

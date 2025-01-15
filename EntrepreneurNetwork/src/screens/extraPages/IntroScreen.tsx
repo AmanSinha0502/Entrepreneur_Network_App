@@ -16,7 +16,6 @@ type Props = {
 const IntroScreen: React.FC<Props> = ({ navigation }) => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const [loading, setLoading] = useState(true); // Loading state to show the loading button
-    const [token, setToken] = useState<string | null>(null); // Token state
 
     useEffect(() => {
         // Start the fade-in animation
@@ -39,7 +38,6 @@ const IntroScreen: React.FC<Props> = ({ navigation }) => {
                 } else {
                     // Not the first time launch, check the token
                     const storedToken = await AsyncStorage.getItem('token');
-                    setToken(storedToken);
                     setLoading(false); // Set loading false after token check
                     if (storedToken) {
                         // Token exists, navigate to Home screen

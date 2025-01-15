@@ -14,7 +14,7 @@ import FriendProfileScreen from '../screens/Profile/FriendProfileScreen';
 import ForgotPassword from '../screens/Auth/ForgotPassword';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import SettingsScreen from '../screens/Profile/SettingsScreen';
-import Demo from '../screens/extraPages/demo';
+import Search from '../screens/extraPages/SearchScreen';
 import Toast from 'react-native-toast-message';
 import { AuthProvider } from '../context/AuthContext';
 
@@ -23,7 +23,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigator = () => (
   <NavigationContainer >
     <SafeAreaView style={{flex:1}}>
-    <AuthProvider>
+    
     <Stack.Navigator screenOptions={{
          headerShown: false,
        }}
@@ -38,11 +38,11 @@ const AppNavigator = () => (
       <Stack.Screen name="FriendProfile" component={FriendProfileScreen}/>
       <Stack.Screen name="Profile" component={ProfileScreen}/>
       <Stack.Screen name="Settings" component={SettingsScreen}/>
-      <Stack.Screen name="Demo" component={Demo}/>
+      <Stack.Screen name="Search" component={Search}/>
+      
 
     </Stack.Navigator>
     <Toast />
-    </AuthProvider>
     </SafeAreaView>
   </NavigationContainer>
 );

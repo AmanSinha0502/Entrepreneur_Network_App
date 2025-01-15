@@ -48,7 +48,7 @@ const login = async (req, res) => {
     try {
         
         const { email, password } = req.body;
-
+ 
         const userExist = await User.findOne({ email });
 
         if (!userExist) {
@@ -64,6 +64,7 @@ const login = async (req, res) => {
                 msg: "Login Successful",
                 token: await userExist.generateToken(),
                 userId: userExist._id.toString(),
+                username: userExist.username,
             });
             
         }

@@ -10,6 +10,6 @@ export type RootStackParamList = {
     Profile:undefined;
     ForgotPassword:undefined;
     Settings:undefined;
-    Demo:undefined;
+    Search:undefined;
   };
   
